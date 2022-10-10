@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -87,6 +88,21 @@ class TaskControllerIntegrationTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.title").value("Title is mandatory"))
                 .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    void testUpdateTask_whenValidTask_expect200() throws Exception {
+
+        TaskDto taskDto = getTaskDto();
+        taskDto.setTitle("NewTitle");
+
+        mvc.perform(put("/api/task/1")
+                    .contentType(APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(taskDto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("NewTitle"))
+                .andDo(MockMvcResultHandlers.print());
+
     }
 
     public TaskDto getTaskDto() {

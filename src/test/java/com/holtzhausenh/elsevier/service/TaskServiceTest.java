@@ -1,6 +1,7 @@
 package com.holtzhausenh.elsevier.service;
 
 import com.holtzhausenh.elsevier.dto.TaskDto;
+import com.holtzhausenh.elsevier.exception.TaskException;
 import com.holtzhausenh.elsevier.persistence.entity.Task;
 import com.holtzhausenh.elsevier.persistence.repository.TasksRepository;
 import org.junit.jupiter.api.Test;
@@ -11,8 +12,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -69,5 +72,51 @@ class TaskServiceTest {
         assertEquals(task1.getTitle(), actualTask1.getTitle());
         assertEquals(task1.getDescription(), actualTask1.getDescription());
         assertEquals(task1.isFinished(), actualTask1.isFinished());
+    }
+
+    @Test
+    void testUpdateTask_ExpectSuccess() {
+
+        TaskDto task = TaskDto.builder()
+                .title("NewTitle")
+                .description("New desc")
+                .finished(true)
+                .build();
+
+        Task savedEntity = new Task();
+        savedEntity.setTitle("oldTitle");
+        savedEntity.setDescription("Old Desc");
+        savedEntity.setFinished(false);
+
+        Task toUpdate = new Task();
+        toUpdate.setTitle(task.getTitle());
+        toUpdate.setDescription(task.getDescription());
+        toUpdate.setFinished(task.isFinished());
+
+        when(repository.findById(1L)).thenReturn(Optional.of(toUpdate));
+        when(repository.save(toUpdate)).thenReturn(toUpdate);
+
+        TaskDto actualTask = taskService.updateTask(1L, task);
+
+        assertEquals(task.getTitle(), actualTask.getTitle());
+        assertEquals(task.getDescription(), actualTask.getDescription());
+        assertEquals(task.isFinished(), actualTask.isFinished());
+    }
+
+    @Test
+    void testUpdateTask_whenNotFound_expectException() {
+
+        TaskDto task = TaskDto.builder()
+                .title("NewTitle")
+                .description("New desc")
+                .finished(true)
+                .build();
+
+        when(repository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(
+                TaskException.class,
+                () -> taskService.updateTask(1L, task)
+        );
     }
 }

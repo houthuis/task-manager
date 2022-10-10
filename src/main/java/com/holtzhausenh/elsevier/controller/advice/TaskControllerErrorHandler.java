@@ -1,5 +1,6 @@
 package com.holtzhausenh.elsevier.controller.advice;
 
+import com.holtzhausenh.elsevier.dto.ErrorResponse;
 import com.holtzhausenh.elsevier.exception.TaskException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -21,15 +22,15 @@ import java.util.Map;
 public class TaskControllerErrorHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(value = TaskException.class)
-    protected ResponseEntity<Object> handleTaskException(TaskException exception) {
+    protected ResponseEntity<ErrorResponse> handleTaskException(TaskException exception) {
         log.error("Failed to process request", exception);
-        return ResponseEntity.internalServerError().body(exception.getMessage());
+        return ResponseEntity.internalServerError().body(ErrorResponse.builder().errorMessage(exception.getMessage()).build());
     }
 
     @ExceptionHandler(value = Exception.class)
-    protected ResponseEntity<Object> handleTaskException(Exception exception) {
+    protected ResponseEntity<ErrorResponse> handleTaskException(Exception exception) {
         log.error("Failed to process request", exception);
-        return ResponseEntity.internalServerError().body("Failed to process request");
+        return ResponseEntity.internalServerError().body(ErrorResponse.builder().errorMessage("Failed to process request").build());
     }
 
     @Override

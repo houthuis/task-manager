@@ -8,4 +8,6 @@ public interface TaskService {
 
     TaskDto addTask(TaskDto task);
     List<TaskDto> getTasks();
+
+    TaskDto updateTask(Long id, TaskDto task);
 }

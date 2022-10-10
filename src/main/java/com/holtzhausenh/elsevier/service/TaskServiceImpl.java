@@ -28,14 +28,6 @@ public class TaskServiceImpl implements TaskService {
         log.trace("Saving entity to db: {}", task);
         Task saved = tasksRepository.save(task);
         return mapToDto(saved);
-
-//        Optional<Task> savedTask = tasksRepository.findByTitle(taskDto.getTitle());
-//
-//        if (savedTask.isPresent()) {
-//            return mapToDto(savedTask.get());
-//        } else {
-//            throw new TaskException("Unable to save task");
-//        }
     }
 
     @Override
@@ -45,6 +37,28 @@ public class TaskServiceImpl implements TaskService {
         List<Task> tasks = tasksRepository.findAll();
         log.debug("Found {} tasks", tasks.size());
         return tasks.stream().map(TaskServiceImpl::mapToDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public TaskDto updateTask(Long id, TaskDto task) {
+        log.info("Entered updateTask with dto: {}", task);
+
+        Optional<Task> storedTaskOptional = tasksRepository.findById(id);
+
+        if (storedTaskOptional.isEmpty()) {
+            log.warn("Task with id {} does not exist", id);
+            throw new TaskException(String.format("Task with id %d does not exist", id));
+        }
+
+        Task storedTask = storedTaskOptional.get();
+        storedTask.setTitle(task.getTitle());
+        storedTask.setDescription(task.getDescription());
+        storedTask.setFinished(storedTask.isFinished());
+
+        log.trace("Saving entity to db: {}", storedTask);
+        Task updatedTask = tasksRepository.save(storedTask);
+
+        return mapToDto(updatedTask);
     }
 
     private static Task mapToEntity(TaskDto task) {
